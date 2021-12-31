@@ -1,8 +1,11 @@
-import firebase from "firebase/compat/app";
-import "firebase/compat/firestore";
-import "firebase/compat/auth";
+// import firebase from "firebase/compat/app";
+// import "firebase/compat/firestore";
+// import "firebase/compat/auth";
 
-const config = {
+import { initializeApp } from "firebase/app";
+import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+
+const firebaseConfig = {
   apiKey: "AIzaSyBkA7YGO-l0Wy6v1h9uA3lBb7Y32zPOALA",
   authDomain: "crwn-clothing-b72d6.firebaseapp.com",
   projectId: "crwn-clothing-b72d6",
@@ -11,12 +14,23 @@ const config = {
   appId: "1:1082793246805:web:8a93ebc1e482d71bd614dc",
 };
 
-firebase.initializeApp(config);
+// firebase.initializeApp(firebaseConfig);
+// export const auth = firebase.auth();
+// export const firestore = firebase.firestore();
+// const provider = new firebase.auth.GoogleAuthProvider();
+// provider.setCustomParameters({ prompt: "select_account" });
+// export const signInWithGoogle = () => auth.signInWithPopup(provider);
 
-export const auth = firebase.auth();
-export const firestore = firebase.firestore();
-const provider = new firebase.auth.GoogleAuthProvider();
-provider.setCustomParameters({ prompt: "select-account" });
-export const signInWithGoogle = () => auth.signInWithPopup(provider);
+// export default firebase;
 
-export default firebase;
+const app = initializeApp(firebaseConfig);
+export const auth = getAuth(app);
+const provider = new GoogleAuthProvider();
+provider.setCustomParameters({ prompt: "select_account" });
+export const signInWithGoogle = async () => {
+  const userInfo = await signInWithPopup(auth, provider)
+    .then((response) => {
+      return response.user.reloadUserInfo;
+    })
+    .catch((err) => console.log(err.message));
+};
