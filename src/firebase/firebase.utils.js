@@ -4,6 +4,13 @@
 
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import {
+  getFirestore,
+  getData,
+  getDocs,
+  addDoc,
+  collection,
+} from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBkA7YGO-l0Wy6v1h9uA3lBb7Y32zPOALA",
@@ -28,9 +35,25 @@ export const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 provider.setCustomParameters({ prompt: "select_account" });
 export const signInWithGoogle = async () => {
-  const userInfo = await signInWithPopup(auth, provider)
+  signInWithPopup(auth, provider)
     .then((response) => {
-      return response.user.reloadUserInfo;
+      // console.log(response);
     })
     .catch((err) => console.log(err.message));
+};
+
+const db = getFirestore();
+
+export const createUserProfileDocument = async (userAuth, additionalData) => {
+  if (!userAuth) return;
+  // const userRef = db.doc(`users/${userAuth.uid}`);
+  const snapShot = await db.get(`users/${userAuth.uid}`);
+  // const querySnapshot = await addDoc(collection(db, "users"), {
+  //   name: userAuth.displayName,
+  // });
+  console.log(snapShot);
+
+  // querySnapshot.forEach((doc) => {
+  //   console.log(`${doc.id} => ${doc.data()}`);
+  // });
 };
