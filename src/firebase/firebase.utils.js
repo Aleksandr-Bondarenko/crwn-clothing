@@ -6,10 +6,15 @@ import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import {
   getFirestore,
+  onSnapshot,
   getData,
-  getDocs,
+  getDoc,
   addDoc,
+  doc,
+  setDoc,
   collection,
+  runTransaction,
+  writeBatch,
 } from "firebase/firestore";
 
 const firebaseConfig = {
@@ -35,25 +40,28 @@ export const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 provider.setCustomParameters({ prompt: "select_account" });
 export const signInWithGoogle = async () => {
-  signInWithPopup(auth, provider)
-    .then((response) => {
-      // console.log(response);
-    })
-    .catch((err) => console.log(err.message));
+  signInWithPopup(auth, provider).catch((err) => console.log(err.message));
 };
 
-const db = getFirestore();
+const db = getFirestore(app);
 
 export const createUserProfileDocument = async (userAuth, additionalData) => {
   if (!userAuth) return;
-  // const userRef = db.doc(`users/${userAuth.uid}`);
-  const snapShot = await db.get(`users/${userAuth.uid}`);
-  // const querySnapshot = await addDoc(collection(db, "users"), {
-  //   name: userAuth.displayName,
-  // });
-  console.log(snapShot);
 
-  // querySnapshot.forEach((doc) => {
-  //   console.log(`${doc.id} => ${doc.data()}`);
-  // });
+  const docRef = doc(db, `users/${userAuth.uid}`);
+  const docSnap = await getDoc(docRef);
+
+  if (!docSnap.exists()) {
+    const { displayName, email } = userAuth;
+    const createdAt = new Date();
+
+    await setDoc(docRef, {
+      displayName,
+      email,
+      createdAt,
+      ...additionalData,
+    });
+  }
+
+  return docRef;
 };
